@@ -1,0 +1,17 @@
+# Node.js
+node_modules/
+
+# .env files
+.env
+
+# Logs
+logs
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Other files to ignore
+*.pid
+*.gz
