@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const sequelize = require('./config/database');
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(limiter);
   // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // בדיקת חיבור למסד נתונים
 sequelize.authenticate()

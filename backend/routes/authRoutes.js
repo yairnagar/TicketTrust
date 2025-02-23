@@ -1,7 +1,10 @@
 const express = require('express');
-const { registerUser, loginUser, verifyOTP , logoutUser, resetPasswordRequest, resetPassword, changePassword } = require('../controllers/authController');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const { registerUser, loginUser, verifyOTP , logoutUser, resetPasswordRequest, resetPassword, changePassword, registerOrganizer, registerAdmin} = require('../controllers/authController');
 const { loginLimiter,passwordChangeLimiter } = require('../middleware/rateLimitMiddleware');
 const { protect } = require('../middleware/authMiddleware');    
+const { verifyAdmin } = require('../middleware/adminMiddleware');
 const router = express.Router();
 
 router.post('/register', registerUser);
@@ -11,4 +14,6 @@ router.post('/logout', protect, logoutUser);
 router.post('/reset-password-request', resetPasswordRequest);   
 router.post('/reset-password', resetPassword);
 router.post('/change-password', protect, passwordChangeLimiter, changePassword);
+router.post('/organizers/register', upload.array('kycDocuments', 5), registerOrganizer);
+router.post('/admins/register',verifyAdmin, registerAdmin);
 module.exports = router;

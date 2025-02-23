@@ -8,6 +8,14 @@ class TransactionTicket extends Model {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
+      ticketId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'Tickets',
+          key: 'id'
+        }
+      },
       buyerId: {
         type: DataTypes.UUID,
         allowNull: false,
@@ -24,25 +32,18 @@ class TransactionTicket extends Model {
           key: 'id'
         }
       },
-      ticketId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: 'Tickets',
-          key: 'id'
-        }
-      },
       price: {
-        type: DataTypes.DECIMAL(10,2),
-        allowNull: false
-      },
-      transactionType: {
-        type: DataTypes.ENUM('initial_purchase', 'secondary_sale'),
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false
       },
       status: {
-        type: DataTypes.ENUM('pending', 'completed', 'failed'),
+        type: DataTypes.ENUM('pending', 'completed', 'failed', 'canceled'), // 🔄 הוספת canceled
+        allowNull: false,
         defaultValue: 'pending'
+      },
+      transactionDate: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -52,9 +53,9 @@ class TransactionTicket extends Model {
   }
 
   static associate(models) {
+    TransactionTicket.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
     TransactionTicket.belongsTo(models.User, { foreignKey: 'buyerId', as: 'buyer' });
     TransactionTicket.belongsTo(models.User, { foreignKey: 'sellerId', as: 'seller' });
-    TransactionTicket.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
   }
 }
 

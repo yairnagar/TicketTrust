@@ -2,14 +2,14 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('TransactionTickets', {
+    await queryInterface.createTable('TransactionsWallets', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
         allowNull: false
       },
-      buyerId: {
+      userId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -18,30 +18,12 @@ module.exports = {
         },
         onDelete: 'CASCADE'
       },
-      sellerId: {
-        type: Sequelize.UUID,
-        allowNull: true, // יכול להיות null אם זו רכישה ראשונה מהאירוע
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onDelete: 'SET NULL'
-      },
-      ticketId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'Tickets',
-          key: 'id'
-        },
-        onDelete: 'CASCADE'
-      },
-      price: {
+      amount: {
         type: Sequelize.DECIMAL(10,2),
         allowNull: false
       },
       transactionType: {
-        type: Sequelize.ENUM('initial_purchase', 'secondary_sale'),
+        type: Sequelize.ENUM('deposit', 'withdrawal'),
         allowNull: false
       },
       status: {
@@ -60,6 +42,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('TransactionTickets');
+    await queryInterface.dropTable('TransactionsWallets');
   }
 };

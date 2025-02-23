@@ -2,39 +2,37 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Marketplaces', {
+    await queryInterface.createTable('Events', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
         allowNull: false
       },
-      sellerId: {
+      organizerId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Users',
+          model: 'Organizers',
           key: 'id'
         },
         onDelete: 'CASCADE'
       },
-      ticketId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'Tickets',
-          key: 'id'
-        },
-        onDelete: 'CASCADE',
-        unique: true
+      eventName: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
-      price: {
-        type: Sequelize.DECIMAL(10,2),
+      eventDate: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      location: {
+        type: Sequelize.STRING,
         allowNull: false
       },
       status: {
-        type: Sequelize.ENUM('listed', 'sold', 'cancelled'),
-        defaultValue: 'listed'
+        type: Sequelize.ENUM('pending', 'approved', 'cancelled'),
+        defaultValue: 'pending'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -48,6 +46,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Marketplaces');
+    await queryInterface.dropTable('Events');
   }
 };

@@ -2,50 +2,43 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Organizers', {
+    await queryInterface.createTable('Tickets', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
         allowNull: false
       },
-      userId: {
+      eventId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'Events',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
+      },
+      ownerId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'Users',
           key: 'id'
         },
-        onDelete: 'CASCADE',
-        unique: true
+        onDelete: 'CASCADE'
       },
-      companyName: {
+      nftTokenId: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false
+      },
+      ticketType: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      businessLicense: {
-        type: Sequelize.STRING,
-        unique: true
-      },
-      websiteUrl: {
-        type: Sequelize.TEXT
-      },
-      kycDocumentUrl: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      kycStatus: {
-        type: Sequelize.ENUM('pending', 'approved', 'rejected'),
-        defaultValue: 'pending'
-      },
-      approvedByAdmin: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onDelete: 'SET NULL'
+      status: {
+        type: Sequelize.ENUM('active', 'sold', 'checked-in'),
+        defaultValue: 'active'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -59,6 +52,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Organizers');
+    await queryInterface.dropTable('Tickets');
   }
 };

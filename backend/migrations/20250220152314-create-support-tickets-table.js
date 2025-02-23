@@ -2,37 +2,42 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Events', {
+    await queryInterface.createTable('SupportTickets', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
         allowNull: false
       },
-      organizerId: {
+      userId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Organizers',
+          model: 'Users',
           key: 'id'
         },
         onDelete: 'CASCADE'
       },
-      eventName: {
+      subject: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      eventDate: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      location: {
-        type: Sequelize.STRING,
+      message: {
+        type: Sequelize.TEXT,
         allowNull: false
       },
       status: {
-        type: Sequelize.ENUM('pending', 'approved', 'cancelled'),
-        defaultValue: 'pending'
+        type: Sequelize.ENUM('open', 'in_progress', 'resolved', 'closed'),
+        defaultValue: 'open'
+      },
+      adminId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'Admins',
+          key: 'id'
+        },
+        onDelete: 'SET NULL'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -46,6 +51,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Events');
+    await queryInterface.dropTable('SupportTickets');
   }
 };

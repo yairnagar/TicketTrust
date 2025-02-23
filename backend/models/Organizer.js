@@ -1,4 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
 class Organizer extends Model {
   static init(sequelize) {
@@ -21,28 +22,57 @@ class Organizer extends Model {
         type: DataTypes.STRING,
         allowNull: false
       },
-      businessLicense: {
+      companyRegistrationNumber: {
         type: DataTypes.STRING,
+        allowNull: false,
         unique: true
       },
-      websiteUrl: {
-        type: DataTypes.TEXT
-      },
-      kycDocumentUrl: {
+      companyAddress: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      kycStatus: {
+      website: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: { isUrl: true }
+      },
+      companyDescription: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      contactPersonName: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      contactEmail: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { isEmail: true }
+      },
+      contactPhone: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      verificationStatus: {
         type: DataTypes.ENUM('pending', 'approved', 'rejected'),
         defaultValue: 'pending'
       },
-      approvedByAdmin: {
-        type: DataTypes.UUID,
+      submissionDate: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+      },
+      adminNotes: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      logoUrl: {
+        type: DataTypes.STRING,
         allowNull: true,
-        references: {
-          model: 'Users',
-          key: 'id'
-        }
+        validate: { isUrl: true }
+      },
+      socialLinks: {
+        type: DataTypes.JSONB, // אחסון רשימה של קישורים לרשתות חברתיות
+        allowNull: true
       }
     }, {
       sequelize,
@@ -53,8 +83,8 @@ class Organizer extends Model {
 
   static associate(models) {
     Organizer.belongsTo(models.User, { foreignKey: 'userId' });
-    Organizer.belongsTo(models.User, { foreignKey: 'approvedByAdmin', as: 'admin' });
     Organizer.hasMany(models.Event, { foreignKey: 'organizerId' });
+    Organizer.hasMany(models.KycDocument, { foreignKey: 'organizerId' });
   }
 }
 

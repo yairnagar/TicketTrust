@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 
-class SupportTicket extends Model {
+class KycDocument extends Model {
   static init(sequelize) {
     return super.init({
       id: {
@@ -8,25 +8,21 @@ class SupportTicket extends Model {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      userId: {
+      organizerId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: 'Users',
+          model: 'Organizers',
           key: 'id'
         }
       },
-      subject: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      message: {
-        type: DataTypes.TEXT,
+      documentPaths: {
+        type: DataTypes.JSONB, // רשימה של מסמכים
         allowNull: false
       },
       status: {
-        type: DataTypes.ENUM('open', 'in_progress', 'resolved', 'closed'),
-        defaultValue: 'open'
+        type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+        defaultValue: 'pending'
       },
       adminId: {
         type: DataTypes.UUID,
@@ -35,19 +31,22 @@ class SupportTicket extends Model {
           model: 'Admins',
           key: 'id'
         }
+      },
+      submittedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
-      modelName: 'SupportTicket',
+      modelName: 'KycDocument',
       timestamps: true
     });
   }
 
   static associate(models) {
-    SupportTicket.belongsTo(models.User, { foreignKey: 'userId' });
-    SupportTicket.belongsTo(models.Admin, { foreignKey: 'adminId' });
-
+    KycDocument.belongsTo(models.Organizer, { foreignKey: 'organizerId' });
+    KycDocument.belongsTo(models.Admin, { foreignKey: 'adminId' });
   }
 }
 
-module.exports = SupportTicket;
+module.exports = KycDocument;

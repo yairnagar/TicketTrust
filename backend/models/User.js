@@ -15,24 +15,40 @@ class User extends Model {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+          isEmail: true
+        }
       },
       phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+          isNumeric: true,
+          len: [10, 15] // מגבלה על מספרים
+        }
       },
       passwordHash: {
         type: DataTypes.TEXT,
         allowNull: false
       },
       userType: {
-        type: DataTypes.ENUM('regular', 'organizer'),
-        allowNull: false
+        type: DataTypes.ENUM('regular', 'organizer', 'admin'),
+        allowNull: false,
+        defaultValue: 'regular'
       },
       status: {
-        type: DataTypes.ENUM('active', 'banned', 'suspended'),
+        type: DataTypes.ENUM('active', 'banned', 'pending'),
         defaultValue: 'active'
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,

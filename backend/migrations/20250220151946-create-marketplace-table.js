@@ -2,14 +2,14 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('SupportTickets', {
+    await queryInterface.createTable('Marketplaces', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
         allowNull: false
       },
-      userId: {
+      sellerId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -18,26 +18,23 @@ module.exports = {
         },
         onDelete: 'CASCADE'
       },
-      subject: {
-        type: Sequelize.STRING,
-        allowNull: false
+      ticketId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'Tickets',
+          key: 'id'
+        },
+        onDelete: 'CASCADE',
+        unique: true
       },
-      message: {
-        type: Sequelize.TEXT,
+      price: {
+        type: Sequelize.DECIMAL(10,2),
         allowNull: false
       },
       status: {
-        type: Sequelize.ENUM('open', 'in_progress', 'resolved', 'closed'),
-        defaultValue: 'open'
-      },
-      adminId: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onDelete: 'SET NULL'
+        type: Sequelize.ENUM('listed', 'sold', 'cancelled'),
+        defaultValue: 'listed'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -51,6 +48,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('SupportTickets');
+    await queryInterface.dropTable('Marketplaces');
   }
 };
