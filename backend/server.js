@@ -7,6 +7,9 @@ const rateLimit = require('express-rate-limit');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const organizerRoutes = require('./routes/organizerRoutes');
+const walletRoutes = require('./routes/walletRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 const sequelize = require('./config/database');
 
 const app = express();
@@ -28,6 +31,9 @@ app.use(limiter);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/organizers', organizerRoutes);
+app.use('/api/wallets', walletRoutes);
+app.use('/api/events', eventRoutes);
 
 // בדיקת חיבור למסד נתונים
 sequelize.authenticate()

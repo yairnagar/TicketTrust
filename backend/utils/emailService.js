@@ -98,9 +98,61 @@ const sendSystemNotification = async (email, message) => {
   await sendEmail(email, subject, text, html);
 };
 
+/**
+ * �� שליחת אימייל עדכון סטטוס למארגן
+ * @param {string} email - Organizer's email address
+ * @param {string} status - New status (approved/rejected/pending)
+ */
+const sendStatusUpdateEmail = async (email, status) => {
+    let subject, text, html;
+
+    switch (status) {
+        case 'approved':
+            subject = 'Your Account is Approved - TicketTrust';
+            text = `Your organizer account has been approved! You can now start creating and managing events on our platform.`;
+            html = `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+                    <h2 style="color: #4CAF50;">TicketTrust - Account Approved</h2>
+                    <p>Your organizer account has been approved!</p>
+                    <p>You can now start creating and managing events on our platform.</p>
+                    <a href="${process.env.FRONTEND_URL}/dashboard" style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px;">Go to Dashboard</a>
+                </div>
+            `;
+            break;
+
+        case 'rejected':
+            subject = 'Account Status Update - TicketTrust';
+            text = `We are unable to approve your organizer account at this time. Please contact our support team for more information.`;
+            html = `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+                    <h2 style="color: #ff9800;">TicketTrust - Account Status Update</h2>
+                    <p>We are unable to approve your organizer account at this time.</p>
+                    <p>Please contact our support team for more information.</p>
+                    <a href="${process.env.FRONTEND_URL}/support" style="display: inline-block; padding: 10px 20px; background: #ff9800; color: #fff; text-decoration: none; border-radius: 5px;">Contact Support</a>
+                </div>
+            `;
+            break;
+
+        case 'pending':
+            subject = 'Account Under Review - TicketTrust';
+            text = `Your organizer account is currently under review. We will notify you once the review process is complete.`;
+            html = `
+                <div style="font-family: Arial, sans-serif; text-align: center; padding: 20px;">
+                    <h2 style="color: #007bff;">TicketTrust - Account Under Review</h2>
+                    <p>Your organizer account is currently under review.</p>
+                    <p>We will notify you once the review process is complete.</p>
+                </div>
+            `;
+            break;
+    }
+
+    await sendEmail(email, subject, text, html);
+};
+
 module.exports = {
   sendEmail,
   sendOTP,
   sendPasswordResetEmail,
-  sendSystemNotification
+  sendSystemNotification,
+  sendStatusUpdateEmail
 };

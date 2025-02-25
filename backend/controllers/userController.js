@@ -152,32 +152,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const getUserWallet = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const wallet = await Wallet.findOne({ where: { userId } });
-
-    if (!wallet) {
-      return sendResponse(res, false, 'Wallet not found', null, 'Invalid wallet', 404);
-    }
-
-    const walletData = {
-      address: wallet.blockchainAddress,
-      balance: wallet.balance
-    };
-
-    return sendResponse(res, true, 'Wallet retrieved successfully', walletData);
-
-  } catch (error) {
-    console.error('❌ Error fetching user wallet:', error);
-    return sendResponse(res, false, 'Failed to fetch wallet', null, error.message, 500);
-  }
-};
-
 module.exports = { 
   getProfile, 
   updateProfile, 
   verifyEmailChange, 
-  deleteUser, 
-  getUserWallet 
+  deleteUser
 };

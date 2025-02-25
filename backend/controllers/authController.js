@@ -1,4 +1,4 @@
-const { User, Wallet, Notification, Ticket, Event, TransactionWallet, Admin } = require('../models');
+const { User, Wallet, Notification, Ticket, Event, TransactionWallet, Admin, Organizer } = require('../models');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../utils/jwt');
 const validator = require('validator');
@@ -70,6 +70,52 @@ const loginUser = async (req, res) => {
       return sendResponse(res, false, 'Invalid email or password', null, 'Authentication failed', 400);
     }
 
+    // בדיקות ספציפיות לפי סוג המשתמש
+    switch (user.userType) {
+      case 'organizer': {
+        const organizer = await Organizer.findOne({ where: { userId: user.id } });
+        if (!organizer) {
+          return sendResponse(res, false, 'Organizer profile not found', null, 'Authentication failed', 400);
+        }
+
+        switch (organizer.verificationStatus) {
+          case 'pending':
+            return sendResponse(res, false, 'Your organizer account is pending verification', null, 'Account pending', 403);
+          case 'rejected':
+            return sendResponse(res, false, 'Your organizer account has been rejected', null, 'Account rejected', 403);
+          case 'approved':
+            break; // ממשיך לתהליך ההתחברות
+          default:
+            return sendResponse(res, false, 'Invalid verification status', null, 'Authentication failed', 400);
+        }
+        break;
+      }
+      
+      case 'admin': {
+        const admin = await Admin.findOne({ 
+          where: { userId: user.id },
+          attributes: ['role', 'permissions'] 
+        });
+        
+        if (!admin) {
+          return sendResponse(res, false, 'Admin profile not found', null, 'Authentication failed', 400);
+        }
+
+        // שומרים את פרטי האדמין בתוך אובייקט המשתמש
+        user.adminRole = admin.role;
+        user.adminPermissions = admin.permissions;
+        break;
+      }
+
+      case 'regular':
+        // אין בדיקות נוספות ליוזר רגיל - ממשיך ישירות לתהליך ה-OTP
+        break;
+
+      default:
+        return sendResponse(res, false, 'Invalid user type', null, 'Authentication failed', 400);
+    }
+
+    // תהליך ההתחברות הרגיל - משותף לכל סוגי המשתמשים שעברו את הבדיקות
     const otp = crypto.randomInt(100000, 999999).toString();
     console.log(`🔑 Generated OTP: ${otp} for ${email}`);
 
@@ -304,9 +350,9 @@ const registerAdmin = async (req, res) => {
   try {
     const { fullName, email, phoneNumber, password, role, permissions } = req.body;
     
-    if (!req.admin || req.admin.role !== 'superadmin') {
-      return sendResponse(res, false, 'Only superadmins can register new admins', null, 'Unauthorized access', 403);
-    }
+    // if (!req.admin || req.admin.role !== 'superadmin') {
+    //   return sendResponse(res, false, 'Only superadmins can register new admins', null, 'Unauthorized access', 403);
+    // }
 
     if (!fullName || !email || !phoneNumber || !password || !role) {
       return sendResponse(res, false, 'All fields are required', null, 'Missing required fields', 400);

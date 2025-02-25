@@ -15,5 +15,5 @@ router.post('/reset-password-request', resetPasswordRequest);
 router.post('/reset-password', resetPassword);
 router.post('/change-password', protect, passwordChangeLimiter, changePassword);
 router.post('/organizers/register', upload.array('kycDocuments', 5), registerOrganizer);
-router.post('/admins/register',verifyAdmin, registerAdmin);
+router.post('/admins/register', registerAdmin);
 module.exports = router;
