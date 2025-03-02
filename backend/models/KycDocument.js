@@ -14,7 +14,8 @@ class KycDocument extends Model {
         references: {
           model: 'Organizers',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       documentPaths: {
         type: DataTypes.JSONB, // רשימה של מסמכים
@@ -30,10 +31,21 @@ class KycDocument extends Model {
         references: {
           model: 'Admins',
           key: 'id'
-        }
+        },
+        onDelete: 'SET NULL'
       },
       submittedAt: {
         type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW
       }
     }, {
@@ -44,8 +56,8 @@ class KycDocument extends Model {
   }
 
   static associate(models) {
-    KycDocument.belongsTo(models.Organizer, { foreignKey: 'organizerId' });
-    KycDocument.belongsTo(models.Admin, { foreignKey: 'adminId' });
+    KycDocument.belongsTo(models.Organizer, { foreignKey: 'organizerId', onDelete: 'CASCADE' });
+    KycDocument.belongsTo(models.Admin, { foreignKey: 'adminId', onDelete: 'SET NULL' });
   }
 }
 

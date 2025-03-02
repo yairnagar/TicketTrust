@@ -14,7 +14,8 @@ class TransactionWallet extends Model {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       amount: {
         type: DataTypes.DECIMAL(10,2),
@@ -27,6 +28,16 @@ class TransactionWallet extends Model {
       status: {
         type: DataTypes.ENUM('pending', 'completed', 'failed'),
         defaultValue: 'pending'
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -36,7 +47,7 @@ class TransactionWallet extends Model {
   }
 
   static associate(models) {
-    TransactionWallet.belongsTo(models.User, { foreignKey: 'userId' });
+    TransactionWallet.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
   }
 }
 

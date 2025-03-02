@@ -1,13 +1,12 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('EventCheckIns', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-        allowNull: false
+        primaryKey: true
       },
       eventId: {
         type: Sequelize.UUID,
@@ -25,8 +24,7 @@ module.exports = {
           model: 'Tickets',
           key: 'id'
         },
-        onDelete: 'CASCADE',
-        unique: true // כל כרטיס יכול להיכנס רק פעם אחת
+        onDelete: 'CASCADE'
       },
       userId: {
         type: Sequelize.UUID,
@@ -39,7 +37,29 @@ module.exports = {
       },
       checkInTime: {
         type: Sequelize.DATE,
+        allowNull: false,
         defaultValue: Sequelize.NOW
+      },
+      verificationMethod: {
+        type: Sequelize.STRING,
+        defaultValue: 'qr_code'
+      },
+      blockchainVerified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      blockchainUpdateBatchId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'BlockchainUpdateBatches',
+          key: 'id'
+        },
+        onDelete: 'SET NULL'
+      },
+      notes: {
+        type: Sequelize.TEXT,
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -52,7 +72,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('EventCheckIns');
   }
 };

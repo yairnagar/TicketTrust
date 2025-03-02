@@ -1,11 +1,11 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('KycDocuments', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('gen_random_uuid()'),
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true
       },
       organizerId: {
@@ -15,11 +15,10 @@ module.exports = {
           model: 'Organizers',
           key: 'id'
         },
-        onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
       documentPaths: {
-        type: Sequelize.JSONB, // שמירת רשימה של מסמכים
+        type: Sequelize.JSONB,
         allowNull: false
       },
       status: {
@@ -33,27 +32,24 @@ module.exports = {
           model: 'Admins',
           key: 'id'
         },
-        onUpdate: 'CASCADE',
         onDelete: 'SET NULL'
       },
       submittedAt: {
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        defaultValue: Sequelize.NOW
       },
       createdAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        allowNull: false
       },
       updatedAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        allowNull: false
       }
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('KycDocuments');
   }
 };

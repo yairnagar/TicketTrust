@@ -14,7 +14,8 @@ class Marketplace extends Model {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       ticketId: {
         type: DataTypes.UUID,
@@ -23,6 +24,7 @@ class Marketplace extends Model {
           model: 'Tickets',
           key: 'id'
         },
+        onDelete: 'CASCADE',
         unique: true
       },
       price: {
@@ -32,6 +34,16 @@ class Marketplace extends Model {
       status: {
         type: DataTypes.ENUM('listed', 'sold', 'cancelled'),
         defaultValue: 'listed'
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -41,8 +53,8 @@ class Marketplace extends Model {
   }
 
   static associate(models) {
-    Marketplace.belongsTo(models.User, { foreignKey: 'sellerId', as: 'seller' });
-    Marketplace.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
+    Marketplace.belongsTo(models.User, { foreignKey: 'sellerId', as: 'seller', onDelete: 'CASCADE' });
+    Marketplace.belongsTo(models.Ticket, { foreignKey: 'ticketId', onDelete: 'CASCADE' });
   }
 }
 

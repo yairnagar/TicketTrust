@@ -15,28 +15,87 @@ class Ticket extends Model {
         references: {
           model: 'Events',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
-      ownerId: {
+      typeId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'TicketTypes',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
+      },
+      userId: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
-      nftTokenId: {
-        type: DataTypes.STRING,
-        unique: true,
-        allowNull: false
+      mintingBatchId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'MintingBatches',
+          key: 'id'
+        },
+        onDelete: 'SET NULL'
       },
-      ticketType: {
+      tokenId: {
         type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
+      },
+      qrCode: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      purchaseDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false
       },
       status: {
-        type: DataTypes.ENUM('active', 'sold', 'checked-in'),
-        defaultValue: 'active'
+        type: DataTypes.ENUM('pending_mint', 'minting', 'minted', 'used', 'cancelled'),
+        defaultValue: 'pending_mint'
+      },
+      metadataUri: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      isTransferable: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+      },
+      transferCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+      },
+      lastTransferDate: {
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      metadata: {
+        type: DataTypes.JSONB,
+        defaultValue: {}
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -46,9 +105,12 @@ class Ticket extends Model {
   }
 
   static associate(models) {
-    Ticket.belongsTo(models.Event, { foreignKey: 'eventId' });
-    Ticket.belongsTo(models.User, { foreignKey: 'ownerId', as: 'owner' });
-    Ticket.hasOne(models.EventCheckIn, { foreignKey: 'ticketId' });
+    this.belongsTo(models.Event, { foreignKey: 'eventId', onDelete: 'CASCADE' });
+    this.belongsTo(models.TicketType, { foreignKey: 'typeId', onDelete: 'CASCADE' });
+    this.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+    this.belongsTo(models.MintingBatch, { foreignKey: 'mintingBatchId', onDelete: 'SET NULL' });
+    this.hasOne(models.EventCheckIn, { foreignKey: 'ticketId' });
+    this.hasMany(models.TransactionTicket, { foreignKey: 'ticketId' });
   }
 }
 

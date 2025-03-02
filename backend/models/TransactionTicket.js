@@ -14,35 +14,67 @@ class TransactionTicket extends Model {
         references: {
           model: 'Tickets',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
-      buyerId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: 'Users',
-          key: 'id'
-        }
-      },
-      sellerId: {
+      fromUserId: {
         type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'SET NULL'
       },
-      price: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
-      },
-      status: {
-        type: DataTypes.ENUM('pending', 'completed', 'failed', 'canceled'), // 🔄 הוספת canceled
+      toUserId: {
+        type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: 'pending'
+        references: {
+          model: 'Users',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
       },
       transactionDate: {
         type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
+      },
+      transactionType: {
+        type: DataTypes.ENUM('purchase', 'transfer', 'resale'),
+        allowNull: false
+      },
+      price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+      },
+      status: {
+        type: DataTypes.ENUM('pending', 'completed', 'failed', 'cancelled'),
+        defaultValue: 'pending'
+      },
+      blockchainTxHash: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      gasUsed: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      gasCost: {
+        type: DataTypes.DECIMAL(18, 8),
+        allowNull: true
+      },
+      metadata: {
+        type: DataTypes.JSONB,
+        defaultValue: {}
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW
       }
     }, {
@@ -53,9 +85,9 @@ class TransactionTicket extends Model {
   }
 
   static associate(models) {
-    TransactionTicket.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
-    TransactionTicket.belongsTo(models.User, { foreignKey: 'buyerId', as: 'buyer' });
-    TransactionTicket.belongsTo(models.User, { foreignKey: 'sellerId', as: 'seller' });
+    this.belongsTo(models.Ticket, { foreignKey: 'ticketId', onDelete: 'CASCADE' });
+    this.belongsTo(models.User, { foreignKey: 'fromUserId', as: 'fromUser', onDelete: 'SET NULL' });
+    this.belongsTo(models.User, { foreignKey: 'toUserId', as: 'toUser', onDelete: 'CASCADE' });
   }
 }
 

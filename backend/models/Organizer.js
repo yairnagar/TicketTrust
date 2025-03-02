@@ -16,6 +16,7 @@ class Organizer extends Model {
           model: 'Users',
           key: 'id'
         },
+        onDelete: 'CASCADE',
         unique: true
       },
       companyName: {
@@ -71,8 +72,19 @@ class Organizer extends Model {
         validate: { isUrl: true }
       },
       socialLinks: {
-        type: DataTypes.JSONB, // אחסון רשימה של קישורים לרשתות חברתיות
-        allowNull: true
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: {}
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -82,7 +94,7 @@ class Organizer extends Model {
   }
 
   static associate(models) {
-    Organizer.belongsTo(models.User, { foreignKey: 'userId' });
+    Organizer.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
     Organizer.hasMany(models.Event, { foreignKey: 'organizerId' });
     Organizer.hasMany(models.KycDocument, { foreignKey: 'organizerId' });
   }

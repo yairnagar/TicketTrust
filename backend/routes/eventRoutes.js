@@ -19,6 +19,11 @@ const {
 
 // נקודות קצה ציבוריות (דורשות אימות משתמש בסיסי)
 router.get('/', protect, getEvents);
+
+// הוספת נתיב לקבלת אירועים של מארגן ספציפי - חייב להיות לפני /:id
+router.get('/organizer/:organizerId', protect, getOrganizerEvents);
+
+// נתיב לקבלת אירוע ספציפי
 router.get('/:id', protect, getEventById);
 
 // נקודות קצה למארגנים
@@ -48,8 +53,5 @@ router.patch('/:id/status',
     verifyAdmin,
     updateEventStatus
 );
-
-// הוספת נתיב חדש לקבלת אירועים של מארגן ספציפי
-router.get('/organizer/:organizerId', protect, getOrganizerEvents);
 
 module.exports = router; 

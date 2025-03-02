@@ -52,4 +52,14 @@ const verifyAdmin = async (req, res, next) => {
   }
 };
 
-module.exports = { verifyAdmin };
+/**
+ * ✅ Middleware לווידוא שהמשתמש המחובר הוא סופר-אדמין
+ */
+const isSuperAdmin = async (req, res, next) => {
+  if (!req.admin || req.admin.role !== 'superadmin') {
+    return sendResponse(res, false, 'Only superadmins can access this resource', null, 'Unauthorized access', 403);
+  }
+  next();
+};
+
+module.exports = { verifyAdmin, isSuperAdmin };

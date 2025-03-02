@@ -14,7 +14,8 @@ class Notification extends Model {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       type: {
         type: DataTypes.ENUM('system', 'event', 'support', 'wallet', 'ticket'),
@@ -27,6 +28,16 @@ class Notification extends Model {
       isRead: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -36,7 +47,7 @@ class Notification extends Model {
   }
 
   static associate(models) {
-    Notification.belongsTo(models.User, { foreignKey: 'userId' });
+    Notification.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
   }
 }
 

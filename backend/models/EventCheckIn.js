@@ -14,7 +14,8 @@ class EventCheckIn extends Model {
         references: {
           model: 'Events',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       ticketId: {
         type: DataTypes.UUID,
@@ -23,7 +24,7 @@ class EventCheckIn extends Model {
           model: 'Tickets',
           key: 'id'
         },
-        unique: true
+        onDelete: 'CASCADE'
       },
       userId: {
         type: DataTypes.UUID,
@@ -31,10 +32,43 @@ class EventCheckIn extends Model {
         references: {
           model: 'Users',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
       checkInTime: {
         type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      verificationMethod: {
+        type: DataTypes.STRING,
+        defaultValue: 'qr_code'
+      },
+      blockchainVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+      blockchainUpdateBatchId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'BlockchainUpdateBatches',
+          key: 'id'
+        },
+        onDelete: 'SET NULL'
+      },
+      notes: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
         defaultValue: DataTypes.NOW
       }
     }, {
@@ -45,9 +79,10 @@ class EventCheckIn extends Model {
   }
 
   static associate(models) {
-    EventCheckIn.belongsTo(models.Event, { foreignKey: 'eventId' });
-    EventCheckIn.belongsTo(models.Ticket, { foreignKey: 'ticketId' });
-    EventCheckIn.belongsTo(models.User, { foreignKey: 'userId' });
+    this.belongsTo(models.Event, { foreignKey: 'eventId', onDelete: 'CASCADE' });
+    this.belongsTo(models.Ticket, { foreignKey: 'ticketId', onDelete: 'CASCADE' });
+    this.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+    this.belongsTo(models.BlockchainUpdateBatch, { foreignKey: 'blockchainUpdateBatchId', as: 'updateBatch', onDelete: 'SET NULL' });
   }
 }
 

@@ -1,11 +1,11 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Admins', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true
       },
       userId: {
@@ -15,8 +15,8 @@ module.exports = {
           model: 'Users',
           key: 'id'
         },
-        unique: true,
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        unique: true
       },
       role: {
         type: Sequelize.ENUM('superadmin', 'moderator', 'reviewer'),
@@ -29,18 +29,16 @@ module.exports = {
       },
       createdAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        allowNull: false
       },
       updatedAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        allowNull: false
       }
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Admins');
   }
 };

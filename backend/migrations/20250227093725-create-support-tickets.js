@@ -1,13 +1,12 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('SupportTickets', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-        allowNull: false
+        primaryKey: true
       },
       userId: {
         type: Sequelize.UUID,
@@ -22,7 +21,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      message: {
+      description: {
         type: Sequelize.TEXT,
         allowNull: false
       },
@@ -30,7 +29,15 @@ module.exports = {
         type: Sequelize.ENUM('open', 'in_progress', 'resolved', 'closed'),
         defaultValue: 'open'
       },
-      adminId: {
+      priority: {
+        type: Sequelize.ENUM('low', 'medium', 'high', 'urgent'),
+        defaultValue: 'medium'
+      },
+      category: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      assignedTo: {
         type: Sequelize.UUID,
         allowNull: true,
         references: {
@@ -38,6 +45,26 @@ module.exports = {
           key: 'id'
         },
         onDelete: 'SET NULL'
+      },
+      relatedEntityId: {
+        type: Sequelize.UUID,
+        allowNull: true
+      },
+      relatedEntityType: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      lastResponseDate: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      resolvedDate: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
+      metadata: {
+        type: Sequelize.JSONB,
+        defaultValue: {}
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -50,7 +77,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('SupportTickets');
   }
 };

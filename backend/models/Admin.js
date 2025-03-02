@@ -15,6 +15,7 @@ class Admin extends Model {
           model: 'Users',
           key: 'id'
         },
+        onDelete: 'CASCADE',
         unique: true
       },
       role: {
@@ -23,21 +24,37 @@ class Admin extends Model {
         defaultValue: 'moderator'
       },
       permissions: {
-        type: DataTypes.JSONB, // כדי לאפשר מתן הרשאות פרטניות
+        type: DataTypes.JSONB,
         allowNull: true
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
       }
     }, {
       sequelize,
       modelName: 'Admin',
+      tableName: 'Admins',
       timestamps: true
     });
   }
 
   static associate(models) {
-    Admin.belongsTo(models.User, { foreignKey: 'userId' });
-    Admin.hasMany(models.KycDocument, { foreignKey: 'adminId' });
-    Admin.hasMany(models.SupportTicket, { foreignKey: 'adminId' });
-
+    if (models.User) {
+      this.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+    }
+    
+    if (models.KycDocument) {
+      this.hasMany(models.KycDocument, { foreignKey: 'adminId' });
+    }
+    
+    if (models.SupportTicket) {
+      this.hasMany(models.SupportTicket, { foreignKey: 'adminId' });
+    }
   }
 }
 

@@ -15,6 +15,7 @@ class Wallet extends Model {
           model: 'Users',
           key: 'id'
         },
+        onDelete: 'CASCADE',
         unique: true
       },
       blockchainAddress: {
@@ -25,6 +26,16 @@ class Wallet extends Model {
       balance: {
         type: DataTypes.DECIMAL(18, 8),
         defaultValue: 0
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW
       }
     }, {
       sequelize,
@@ -34,7 +45,7 @@ class Wallet extends Model {
   }
 
   static associate(models) {
-    Wallet.belongsTo(models.User, { foreignKey: 'userId' });
+    Wallet.belongsTo(models.User, { foreignKey: 'userId', onDelete: 'CASCADE' });
   }
 }
 

@@ -10,16 +10,26 @@ const createEvent = async (req, res) => {
   try {
     const { 
       eventName, 
-      eventDate, 
+      description, 
       location, 
-      description,
-      ticketPrice,
-      totalTickets,
-      startTime,
-      endTime,
+      startDate,
+      endDate,
+      capacity,
       category,
+      imageUrl,
+      isPublic,
+      totalTickets,
+      venueDetails,
+      doorsOpenTime,
+      attendeeInstructions,
+      cancellationPolicy,
+      allowResale,
       ageRestriction,
-      imageUrl 
+      contactInfo,
+      allowEarlyCheckIn,
+      lateCheckInWindow,
+      allowTicketTransfer,
+      metadata
     } = req.body;
     
     // מציאת המארגן המשויך למשתמש
@@ -37,18 +47,29 @@ const createEvent = async (req, res) => {
     const event = await Event.create({
       organizerId: organizer.id,
       eventName,
-      eventDate,
-      location,
       description,
-      ticketPrice,
-      totalTickets,
-      startTime,
-      endTime,
+      location,
+      startDate,
+      endDate,
+      capacity,
       category,
-      ageRestriction,
       imageUrl,
-      soldTickets: 0,
-      status: 'pending'
+      isPublic,
+      totalTickets,
+      venueDetails,
+      doorsOpenTime,
+      attendeeInstructions,
+      cancellationPolicy,
+      allowResale,
+      ageRestriction,
+      contactInfo,
+      allowEarlyCheckIn,
+      lateCheckInWindow,
+      allowTicketTransfer,
+      metadata,
+      status: 'draft',
+      ticketingStatus: 'draft',
+      soldTickets: 0
     });
 
     return sendResponse(res, true, 'Event created successfully', event, null, 201);
@@ -105,7 +126,7 @@ const getEvents = async (req, res) => {
           attributes: ['fullName']
         }]
       }],
-      order: [['eventDate', 'ASC']],
+      order: [['startDate', 'ASC']],
       attributes: {
         exclude: ['createdAt', 'updatedAt']
       }
@@ -205,14 +226,14 @@ const deleteEvent = async (req, res) => {
 
 /**
  * עדכון סטטוס אירוע (רק לאדמין)
- * @route PUT /events/:id/status
+ * @route PATCH /events/:id/status
  */
 const updateEventStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['pending', 'approved', 'cancelled'].includes(status)) {
+    if (!['draft', 'published', 'cancelled', 'completed'].includes(status)) {
       return sendResponse(res, false, 'Invalid status', null, 'Validation error', 400);
     }
 
@@ -221,9 +242,55 @@ const updateEventStatus = async (req, res) => {
       return sendResponse(res, false, 'Event not found', null, 'Invalid event ID', 404);
     }
 
+    // בדיקה אם האירוע מפורסם לראשונה
+    const isFirstPublish = event.status === 'draft' && status === 'published';
+
+    // עדכון סטטוס האירוע
     await event.update({ status });
     
-    return sendResponse(res, true, 'Event status updated successfully', event);
+    // אם האירוע מפורסם לראשונה, פרסם את כל סוגי הכרטיסים במצב טיוטה
+    if (isFirstPublish) {
+      const { TicketType } = require('../models');
+      
+      // מצא את כל סוגי הכרטיסים במצב טיוטה של האירוע
+      const draftTicketTypes = await TicketType.findAll({
+        where: {
+          eventId: id,
+          status: 'draft'
+        }
+      });
+      
+      // פרסם כל סוג כרטיס
+      for (const ticketType of draftTicketTypes) {
+        await ticketType.update({ status: 'active' });
+      }
+      
+      // עדכן את סטטוס מכירת הכרטיסים באירוע אם יש כרטיסים פעילים
+      if (draftTicketTypes.length > 0) {
+        await event.update({ ticketingStatus: 'on_sale' });
+      }
+      
+      console.log(`✅ Published ${draftTicketTypes.length} ticket types automatically`);
+    }
+    
+    // קבל את האירוע המעודכן עם כל המידע
+    const updatedEvent = await Event.findByPk(id, {
+      include: [
+        {
+          model: Organizer,
+          as: 'organizer',
+          attributes: ['companyName', 'id'],
+          include: [
+            {
+              model: User,
+              attributes: ['fullName']
+            }
+          ]
+        }
+      ]
+    });
+    
+    return sendResponse(res, true, 'Event status updated successfully', updatedEvent);
   } catch (error) {
     console.error('❌ Error updating event status:', error);
     return sendResponse(res, false, 'Failed to update event status', null, error.message, 500);
@@ -237,6 +304,7 @@ const updateEventStatus = async (req, res) => {
 const getOrganizerEvents = async (req, res) => {
   try {
     const { organizerId } = req.params;
+    const { status } = req.query;
     
     // מציאת המארגן
     const organizer = await Organizer.findByPk(organizerId);
@@ -244,12 +312,17 @@ const getOrganizerEvents = async (req, res) => {
       return sendResponse(res, false, 'Organizer not found', null, 'Invalid organizer ID', 404);
     }
 
+    // בניית תנאי החיפוש
+    const whereClause = { organizerId };
+    
+    // הוספת סינון לפי סטטוס אם צוין
+    if (status && ['draft', 'published', 'cancelled', 'completed'].includes(status)) {
+      whereClause.status = status;
+    }
+
     // מציאת כל האירועים של המארגן
     const events = await Event.findAll({
-      where: { 
-        organizerId,
-        status: 'approved' // מחזיר רק אירועים מאושרים
-      },
+      where: whereClause,
       include: [{
         model: Organizer,
         as: 'organizer',
@@ -259,7 +332,7 @@ const getOrganizerEvents = async (req, res) => {
           attributes: ['fullName']
         }]
       }],
-      order: [['eventDate', 'ASC']],
+      order: [['startDate', 'ASC']],
       attributes: {
         exclude: ['createdAt', 'updatedAt']
       }
@@ -286,4 +359,4 @@ module.exports = {
   deleteEvent,
   updateEventStatus,
   getOrganizerEvents
-}; 
+};

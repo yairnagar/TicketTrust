@@ -1,13 +1,12 @@
 'use strict';
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Notifications', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('TransactionWallets', {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
-        primaryKey: true,
-        allowNull: false
+        primaryKey: true
       },
       userId: {
         type: Sequelize.UUID,
@@ -18,17 +17,17 @@ module.exports = {
         },
         onDelete: 'CASCADE'
       },
-      type: {
-        type: Sequelize.ENUM('system', 'event', 'support', 'wallet', 'ticket'),
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false
       },
-      message: {
-        type: Sequelize.TEXT,
+      transactionType: {
+        type: Sequelize.ENUM('deposit', 'withdrawal'),
         allowNull: false
       },
-      isRead: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+      status: {
+        type: Sequelize.ENUM('pending', 'completed', 'failed'),
+        defaultValue: 'pending'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -41,7 +40,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Notifications');
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('TransactionWallets');
   }
 };

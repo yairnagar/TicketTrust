@@ -42,41 +42,43 @@ const validateEventData = async (req, res, next) => {
   try {
     const { 
       eventName, 
-      eventDate, 
       location, 
-      startTime, 
-      endTime,
-      ticketPrice,
-      totalTickets,
+      startDate, 
+      endDate,
+      capacity,
       category 
     } = req.body;
 
     // בדיקת שדות חובה
-    if (!eventName || !eventDate || !location || !startTime || !endTime || !ticketPrice || !totalTickets || !category) {
+    if (!eventName || !location || !startDate || !endDate || !capacity) {
       return sendResponse(res, false, 'Missing required fields', null, 'Validation error', 400);
     }
 
-    // וולידציה של מיקום
-    if (!location.city || !location.address || !location.venue) {
-      return sendResponse(res, false, 'Location must include city, address and venue', null, 'Invalid location data', 400);
+    // וולידציה של מיקום (אם מיקום הוא אובייקט)
+    if (typeof location === 'object') {
+      return sendResponse(res, false, 'Location must be a string', null, 'Invalid location data', 400);
     }
 
     // וולידציה של תאריך ושעה
-    const eventDateTime = new Date(eventDate);
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
     const now = new Date();
 
-    if (eventDateTime < now) {
-      return sendResponse(res, false, 'Event date must be in the future', null, 'Invalid event date', 400);
+    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+      return sendResponse(res, false, 'Invalid date format', null, 'Invalid date format', 400);
     }
 
-    // וולידציה של מחיר כרטיס
-    if (ticketPrice < 0) {
-      return sendResponse(res, false, 'Ticket price cannot be negative', null, 'Invalid ticket price', 400);
+    if (startDateTime < now) {
+      return sendResponse(res, false, 'Event start date must be in the future', null, 'Invalid event date', 400);
     }
 
-    // וולידציה של כמות כרטיסים
-    if (totalTickets < 1) {
-      return sendResponse(res, false, 'Total tickets must be at least 1', null, 'Invalid tickets amount', 400);
+    if (endDateTime <= startDateTime) {
+      return sendResponse(res, false, 'End date must be after start date', null, 'Invalid event dates', 400);
+    }
+
+    // וולידציה של קיבולת
+    if (isNaN(capacity) || capacity < 1) {
+      return sendResponse(res, false, 'Capacity must be at least 1', null, 'Invalid capacity', 400);
     }
 
     next();
@@ -91,7 +93,7 @@ const canModifyEvent = async (req, res, next) => {
   try {
     const event = req.event; // מהמידלוור הקודם
 
-    if (event.status === 'approved') {
+    if (event.status === 'published') {
       const restrictedFields = ['eventDate', 'location', 'startTime', 'endTime', 'totalTickets'];
       const hasRestrictedChanges = restrictedFields.some(field => req.body[field] !== undefined);
 
@@ -99,7 +101,7 @@ const canModifyEvent = async (req, res, next) => {
         return sendResponse(
           res, 
           false, 
-          'Cannot modify critical details of an approved event', 
+          'Cannot modify critical details of a published event', 
           null, 
           'Invalid modification', 
           400
